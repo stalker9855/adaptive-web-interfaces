@@ -1,4 +1,5 @@
-﻿public class Program
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+public class Program
 {
     /*
      * Method reads file from current folder.
@@ -37,69 +38,32 @@
     }
     public void Calculator()
     {
-        bool requestExit = false;
-        double result = 0;
-        while (!requestExit)
-        {
-            /*
-             * The userInput field represents a string received 
-             * from the console using Console.ReadLine().
-             * The string entered by the user is stored 
-             * in this field and can contain a numeric
-             * value or the "exit" command.
-             */
-            Console.WriteLine("Enter number (or type 'exit' to exit): ");
-            string input = Console.ReadLine();
-
-
-            if (input.ToLower() == "exit")
-            {
-                requestExit = true;
-                continue;
-            }
-            if (!double.TryParse(input, out double number))
-            {
-                Console.WriteLine("invalid number.\nEnter again: ");
-                continue;
-            }
-            Console.WriteLine("Enter operation (+, -, *, /): ");
-            string operation = Console.ReadLine();
-            switch (operation)
-            {
-                case "+":
-                    result += number;
-                    Console.WriteLine(result);
-                    break;
-                case "-":
-                    result -= number;
-                    Console.WriteLine(result);
-                    break;
-                case "*":
-                    result *= number;
-                    Console.WriteLine(result);
-                    break;
-                case "/":
-                    try
-                    {
-                        if (number == 0)
-                        {
-                            throw new DivideByZeroException();
-                        }
-                        result /= number;
-                        Console.WriteLine(result);
-                        break;
-                    }
-                    catch (DivideByZeroException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                    break;
-                default:
-                    break;
-            }
+        Console.WriteLine("Enter expression:");
+        /*
+         * Value type is string. Enter expression using numbers and operators and use
+         * method Parse for converting to expression
+         */
+        string expression = Console.ReadLine();
+        try
+        {            
+            double result = Parse(expression);
+            Console.WriteLine("Result: " + result);
         }
-       
-
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+    }
+    double Parse(string expression)
+    {
+        try
+        {
+            return CSharpScript.EvaluateAsync<double>(expression).Result;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Error evaluating the expression.", ex);
+        }
     }
     public static void Main()
     {
