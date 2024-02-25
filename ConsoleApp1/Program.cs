@@ -1,153 +1,85 @@
-﻿using System.Data.Common;
-using System.Data.SqlClient;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using HtmlAgilityPack;
+﻿using System.Reflection;
+
+enum MobState
+{
+    Friendly,
+    Netural,
+    Aggressive
+}
+class Mob
+{
+    protected string name;
+    private int HP { get; set; }
+    private float mana;
+    protected int damage;
+    public MobState state;
+    public double speed;
+
+    public Mob(string name, int hp, float mana, int damage, double speed, MobState state)
+    {
+        this.name = name;
+        this.HP = hp;
+        this.mana = mana;
+        this.damage = damage;
+        this.speed = speed;
+        this.state = state;
+    }
+
+    public void usePotion(double newSpeed)
+    {
+        speed = newSpeed;
+        Console.WriteLine($"The mob used the potion of speed. Speed: {newSpeed}");
+    }
+
+    public void usePotion(int restoreHP)
+    {
+        HP += restoreHP;
+        Console.WriteLine($"The mob used the potion of health. Health: {HP}");
+    }
+
+    public void DecreaseHP(int amount)
+    {
+        HP -= amount;
+        Console.WriteLine($"Hit by {amount}. Hp is: {HP}");
+    }
+    public override string ToString()
+    {
+        return $"{name}\n\t-- Health: {HP} --\n";
+    }
+}
 class Program
 {
-    static void ThreadFun1(List<int> numbers, string threadName)
-    {
-        foreach (int number in numbers)
-        {
-            if(number < 10)
-            {
-                Console.WriteLine($"{threadName}: {number}");
-            }
-        }
-    }
-    static void ThreadFun2()
-    {
-        string connectionString = "Data Source=(local);Initial Catalog=GameDatabase;Integrated Security=True";
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            connection.Open();
-            using (SqlCommand command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT g.title, dc.name " +
-                                      "FROM Games g " +
-                                      "JOIN DevelopersCompanies dc ON g.developer_company_id = dc.developer_company_id where dc.name = 'Valve Corporation'";
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        string gameTitle = reader.GetString(0);
-                        string companyName = reader.GetString(1);
-                        Console.WriteLine($"{companyName}: {gameTitle}");
-                    }
-                }
-            }
-        }
-    }
-    static void ThreadFun3()
-    {
-        string connectionString = "Data Source=(local);Initial Catalog=GameDatabase;Integrated Security=True";
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            connection.Open();
-            using (SqlCommand command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT title, release_year, rating_id FROM Games g ";
-                                    
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    using (StreamWriter file = new StreamWriter("data.json"))
-                    {
-                        while (reader.Read())
-                        {
-                            string gameTitle = reader.GetString(0);
-                            DateTime releaseYear = reader.GetDateTime(1);
-                            int ratingId = reader.GetInt32(2);
-
-                            string jsonData = $"{{\"title\": \"{gameTitle}\", \"release_year\": \"{releaseYear}\", \"rating_id\": {ratingId}}},";
-
-                            file.WriteLine(jsonData);
-                        }
-                        Console.WriteLine("Succes wrote the file");
-                    }
-                }
-            }
-        }
-    }
-
-
-    static async Task AsyncFun1()
-    {
-        try
-        {
-            using(HttpClient client = new HttpClient())
-            {
-                string url = "https://google.com";
-                HttpResponseMessage response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
-
-                HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(responseBody);
-
-                HtmlNode companyNameNode = htmlDocument.DocumentNode.SelectSingleNode("//title");
-                string companyName = companyNameNode.InnerText;
-                await Console.Out.WriteLineAsync(companyName);
-
-            }
-        } 
-        catch (Exception ex)
-        {
-            await Console.Out.WriteLineAsync(ex.Message);
-        }
-    }
-
-    static async Task AsyncFun2()
-    {
-        string dataJson = "data.json";
-        try
-        {
-            using(StreamReader reader = File.OpenText(dataJson))
-            {
-                string line;
-                int lineCount = 0;
-
-                while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    lineCount++;
-                }
-
-                Console.WriteLine($"Line count: {lineCount}");
-            }
-        }
-        catch(Exception ex)
-        {
-            await Console.Out.WriteLineAsync(ex.Message);
-        }
-    }
-
-    static async Task<int> AsyncFun3(int a, int b)
-    {
-        await Task.Delay(1000);
-
-        return a + b;
-    }
 
     static void Main()
     {
-        List<int> numbers = new List<int> { 555, 511, 8, 3, 152, 120, 2576 };
-        Thread thread1 = new Thread(() => ThreadFun1(numbers, "Thread 1"));
-        Thread thread2 = new Thread(new ThreadStart(ThreadFun2));
-        Thread thread3 = new Thread(new ThreadStart(ThreadFun3));
+        Mob slime = new Mob("Slime", 50, 0, 5, 5, MobState.Aggressive);
+        Mob ent = new Mob("Ent, Protector of the Forest", 200, 50, 60, 10, MobState.Netural);
 
-        
-        thread2.Start();
-        thread1.Start();
-        thread3.Start();
+        Type slimeType = slime.GetType();
+        Console.WriteLine(slimeType);
 
-        thread1.Join();
-        thread2.Join();
-        thread3.Join();
+        TypeInfo entTypeInfo = ent.GetType().GetTypeInfo();
+        Console.WriteLine("\n"+entTypeInfo.Name);
+        Console.WriteLine(entTypeInfo.IsClass);
 
-        AsyncFun1().GetAwaiter().GetResult();
-        AsyncFun2().GetAwaiter().GetResult();
-        Console.WriteLine(AsyncFun3(2, 56).GetAwaiter().GetResult());
 
+        MemberInfo[] members = typeof(Mob).GetMembers();
+        foreach (MemberInfo member in members)
+        {
+            Console.WriteLine(member.Name);
+        }
+        Console.WriteLine("\n");
+        FieldInfo[] fields = typeof(Mob).GetFields();
+        foreach (FieldInfo field in fields)
+        {
+            Console.WriteLine(field.Name);
+        }
+
+
+        MethodInfo decreaseMethodHPMethod = typeof(Mob).GetMethod("DecreaseHP");
+        object[] parameters = { 10 };
+        Console.WriteLine(ent);
+        decreaseMethodHPMethod.Invoke(ent, parameters);
 
     }
 }
