@@ -25,10 +25,13 @@ namespace ConsoleApp1
             }
             Console.WriteLine("\n");
             FieldInfo[] fields = typeof(Mob).GetFields();
+            FieldInfo privateField = typeof(Mob).GetField("mana", BindingFlags.NonPublic | BindingFlags.Instance);
+            
             foreach (FieldInfo field in fields)
             {
                 Console.WriteLine(field.Name);
             }
+            Console.WriteLine($"Private filed: {privateField}");
 
 
             MethodInfo decreaseMethodHPMethod = typeof(Mob).GetMethod("DecreaseHP");
