@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using System.IO;
 using WebApplication2.Models;
 using WebApplication2.Services.ApiService;
 
@@ -38,6 +36,26 @@ namespace WebApplication2.Controllers
                     responseModel.Message);
             }
         }
+        [HttpGet("QuqoteByAnimeCharachter")]
+        public async Task<ActionResult> GetQuqoteByAnimeCharacher(string character)
+        {
+            var responseModel = new ResponseModel<AnimeCharcterModel?>();
+            try
+            {
+                responseModel.Data = await _apiService.GetApi<AnimeCharcterModel>($"https://animechan.xyz/api/random/character?name={character}");
+                responseModel.StatusCode = HttpStatusCode.OK;
+                responseModel.Message = "Success! COOL!";
+                return Ok(responseModel);
+            }
+            catch (Exception ex)
+            {
+                responseModel.StatusCode = HttpStatusCode.NotFound;
+                responseModel.Message = ex.Message;
+                return StatusCode((int)responseModel.StatusCode,
+                    responseModel.Message);
+            }
+        }
+
         [HttpPost("PostRandomQuote")]
         public async Task<ActionResult> PostAnime()
         {
