@@ -1,4 +1,4 @@
-﻿namespace WebApplication2.Services.ApiService
+﻿namespace WebApplication2.Services.ApiService.ApiService
 {
     public interface IApiService
     {
