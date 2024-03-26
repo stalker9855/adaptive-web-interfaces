@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication2.Models;
 using WebApplication2.Services.MangakaService;
 
@@ -6,6 +7,7 @@ namespace WebApplication2.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class MangakaController : ControllerBase
     {
         private readonly IMangakaService _mangakaService;

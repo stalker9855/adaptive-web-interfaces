@@ -1,11 +1,14 @@
-﻿using WebApplication2.Models;
+﻿using System.Runtime.CompilerServices;
+using WebApplication2.Models;
 using WebApplication2.Services.AnimeService;
+using WebApplication2.Services.AuthService;
 
 namespace WebApplication2.Services.UserService
 {
     public class UserService : IUserService
     {
         private readonly IAnimeService _animeService;
+        public readonly IAuthService _authService;
         private static int id = 1;
         private static List<UserModel> users = new List<UserModel> {
             new UserModel {
@@ -17,31 +20,31 @@ namespace WebApplication2.Services.UserService
             new UserModel {
                 Id = id++,
                 Username = "hashedMan",
-                Password = "no_hash-password??",
+                Password = "no_hash",
                 FavouriteAnime = new List<AnimeModel>()
             },
             new UserModel {
                 Id = id++,
                 Username = "Kratos",
-                Password = "destr01_a11_g0dZ",
+                Password = "stalker123",
                 FavouriteAnime = new List<AnimeModel>()
                 },
             new UserModel {
                 Id = id++,
                 Username = "DOOM Slayer",
-                Password = "hrtjiokb15652hvgqwh1487$ufi31",
+                Password = "doom12345",
                 FavouriteAnime = new List<AnimeModel>()
                 },
             new UserModel {
                 Id = id++,
                 Username = "Postal_man",
-                Password = "daawe1efgwergstrhnyuae501_fweqa1qwet31_g0123dZ",
+                Password = "1234",
                 FavouriteAnime = new List<AnimeModel>()
                 },
             new UserModel {
                 Id = id++,
                 Username = "Batman",
-                Password = "liodes2451245r046i56t1_a11_g0gvwesdxwZ",
+                Password = "123456",
                 FavouriteAnime = new List<AnimeModel>()
                 },
             new UserModel {
@@ -65,12 +68,23 @@ namespace WebApplication2.Services.UserService
 
             };
 
-        public UserService(IAnimeService animeService)
+        private void InitializeUsersWithHashedPassword()
         {
-            _animeService = animeService;
-
-            InitializeUsersWithRandomAnime(3);
+            foreach (var user in users)
+            {
+                _authService.SetUserPasswordHash(user, user.Password);
+            }
         }
+
+        public UserService(IAuthService authService)
+        {
+            _authService = authService;
+            InitializeUsersWithHashedPassword();
+            //_animeService = animeService;
+
+            //InitializeUsersWithRandomAnime(3);
+        }
+
 
         private void InitializeUsersWithRandomAnime(int numberOfAnimePerUser)
         {
@@ -121,6 +135,29 @@ namespace WebApplication2.Services.UserService
             users.Add(userModel);
             return Task.FromResult(userModel);
 
+        }
+
+        public Task<bool> GetUserByName(LoginModel loginModel)
+        {
+            
+            var user = users.FirstOrDefault(u => u.Username == loginModel.Username);
+            if(user != null && _authService.VerifyPassword(user, loginModel.Password))
+            {
+                user.LastLogin = DateTime.Now;
+                return Task.FromResult(true);
+            }
+            user.AttemptsLogin++;
+            return Task.FromResult(false);
+        }
+
+        public bool GetUsername(string username, string email)
+        {
+            var user = users.FirstOrDefault(u => u.Username == username);
+            if(user.Username != null || user.Email != null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

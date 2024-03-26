@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication2.Models;
 using WebApplication2.Services.AnimeService;
 using WebApplication2.Services.ApiService.ApiService;
 
 namespace WebApplication2.Controllers
 {
+    
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class AnimeController : ControllerBase
     {
         readonly private IAnimeService _animeService;

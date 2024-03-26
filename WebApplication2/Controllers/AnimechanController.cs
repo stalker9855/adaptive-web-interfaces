@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
 using WebApplication2.Models;
@@ -8,6 +9,7 @@ namespace WebApplication2.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class AnimechanController : ControllerBase
     {
         readonly private IApiService _apiService;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication2.Models;
 using WebApplication2.Services.UserService;
 
@@ -6,6 +7,7 @@ namespace WebApplication2.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -68,17 +70,5 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("AddUser")]
-        public async Task<ActionResult> AddUser(UserModel userModel)
-        {
-            try
-            {
-                await _userService.AddUser(userModel);
-                return Ok(userModel);
-            } catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
     }
 }
